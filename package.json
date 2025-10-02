@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/HckR01/Linkup/issues"
   },
-  "homepage": "https://github.com/HckR01/Linkup#readme"
+  "homepage": "https://github.com/HckR01/Linkup#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }
