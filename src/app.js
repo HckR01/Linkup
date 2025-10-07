@@ -64,20 +64,31 @@ app.delete("/duser", async (req, res) => {
   }
 });
 //update user
-app.patch("/userupdate", async (req, res) => {
-  const userId = req.body.userId; // <-- matches your Postman key
-  const newAge = req.body.age; // <-- matches your Postman key
+app.patch("/userupdate/:userId", async (req, res) => {
+  const userId = req.params?.userId; // extract userId from params
+  const data = req.body;
+
   try {
-    const user = await User.findByIdAndUpdate(userId, { age: newAge });
-    if (!user) {
-      return res.status(404).send("User not found");
+    const allowedUpdates = ["gender", "age", "lastName", "firstName"];
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      allowedUpdates.includes(k)
+    );
+    if (isUpdateAllowed === false) {
+      throw new Error("Invalid updates!");
     }
-    res.send("User updated successfully");
+
+    const user = await User.findByIdAndUpdate(userId, data, {
+      runValidators: true,
+      returnDocument: "after",
+    });
+    console.log(user);
+
+    res.send("updated successfully"); // send the updated user
   } catch (err) {
-    console.error("Error updating user:", err);
-    res.status(500).send("Something went wrong");
+    res.status(400).send("Something went wrong" + err.message);
   }
 });
+
 //.....................................................................
 
 //call the function and error handel

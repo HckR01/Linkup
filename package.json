@@ -23,6 +23,8 @@
   "homepage": "https://github.com/HckR01/Linkup#readme",
   "dependencies": {
     "express": "^5.1.0",
-    "mongoose": "^8.19.0"
+    "mongoose": "^8.19.0",
+    "validator": "^13.15.15",
+    "validatorjs": "^3.14.0"
   }
 }
