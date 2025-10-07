@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
+    minlength: 3, // ✅ fixed
     required: true,
   },
   lastName: {
@@ -11,6 +12,7 @@ const userSchema = new mongoose.Schema({
   },
   emailId: {
     type: String,
+    lowercase: true,
     required: true,
     unique: true,
   },
@@ -25,6 +27,12 @@ const userSchema = new mongoose.Schema({
   gender: {
     type: String,
     required: true,
+    validate(value) {
+      const allowedGenders = ["male", "female", "other"];
+      if (!allowedGenders.includes(value.toLowerCase())) {
+        throw new Error("Invalid gender! Allowed values: male, female, other");
+      }
+    },
   },
 });
 

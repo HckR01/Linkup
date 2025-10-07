@@ -5,27 +5,80 @@ const User = require("./models/user");
 const app = express();
 const port = 3000;
 
-//call api
+app.use(express.json()); //middleware to parse json data
+//call api ...........................................................
 app.post("/signup", async (req, res) => {
-  //make user instance to put in the database
-  const user = new User({
-    firstName: "John",
-    lastName: "Doe",
-    emailId: "Y7A7o@example.com",
-    password: "123456",
-    age: 25,
-    gender: "male",
-  });
-  //when ever we do db operation we use try catch block
-
+  // console.log(req.body);
+  //make user
+  // instance to put in the database
+  const user = new User(req.body);
+  // //when ever we do db operation we use try catch block
   try {
     await user.save();
     res.send("user add done:)");
   } catch (err) {
     console.error("Error saving user:", err);
-    res.status(400).send("Internal Server Error");
+    res.status(400).send("Internal Server Error" + err.message);
   }
 });
+//find user by the email
+app.get("/user", async (req, res) => {
+  try {
+    //here users is a array after use the find method it send back a array
+    const user = await User.find({ age: req.body.age });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    res.send(user);
+  } catch (err) {
+    console.error("Error finding user:", err);
+    res.status(404).send("something went wrong");
+  }
+});
+
+//FEED API to get all the data to the db
+app.get("/feed", async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.send(users);
+  } catch (err) {
+    console.error("Error finding user:", err);
+    res.status(404).send("something went wrong");
+  }
+});
+
+//delete id
+app.delete("/duser", async (req, res) => {
+  const userId = req.body.userId; // <-- matches your Postman key
+  try {
+    const user = await User.findByIdAndDelete(userId);
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    res.send("User deleted successfully");
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    res.status(500).send("Something went wrong");
+  }
+});
+//update user
+app.patch("/userupdate", async (req, res) => {
+  const userId = req.body.userId; // <-- matches your Postman key
+  const newAge = req.body.age; // <-- matches your Postman key
+  try {
+    const user = await User.findByIdAndUpdate(userId, { age: newAge });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    res.send("User updated successfully");
+  } catch (err) {
+    console.error("Error updating user:", err);
+    res.status(500).send("Something went wrong");
+  }
+});
+//.....................................................................
 
 //call the function and error handel
 connectDB()
