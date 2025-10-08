@@ -37,6 +37,28 @@ app.post("/signup", async (req, res) => {
     res.status(400).send("Internal Server Error" + err.message);
   }
 });
+
+//login API
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("emailid not found");
+    }
+    //check the password by bcrypt
+    const result = await bcrypt.compare(password, user.password);
+    //(small u) → one document (like an instance)
+    if (result) {
+      res.send("login success");
+    } else {
+      throw new Error("password incorrect"); //throw error
+    }
+  } catch (err) {
+    console.error("Error finding user:", err);
+    res.status(404).send("something went wrong");
+  }
+});
 //find user by the email
 app.get("/user", async (req, res) => {
   try {
