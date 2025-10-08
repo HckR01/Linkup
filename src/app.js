@@ -2,18 +2,34 @@ const express = require("express");
 // const { auth } = require("./middleware/auth.js"); // ✅ fixed import
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const { validesignUp } = require("./utils/validation");
+const bcrypt = require("bcrypt");
 const app = express();
 const port = 3000;
 
 app.use(express.json()); //middleware to parse json data
 //call api ...........................................................
 app.post("/signup", async (req, res) => {
-  // console.log(req.body);
-  //make user
-  // instance to put in the database
-  const user = new User(req.body);
-  // //when ever we do db operation we use try catch block
   try {
+    //validation
+    validesignUp(req);
+    //hash password
+    const { firstName, lastName, emailId, password, age, gender } = req.body;
+    const passwordHash = await bcrypt.hash(password, 10); //10 is salt rounds
+    req.body.password = passwordHash;
+    console.log(req.body);
+
+    //make user
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+      age,
+      gender,
+    });
+    // //when ever we do db operation we use try catch block
+
     await user.save();
     res.send("user add done:)");
   } catch (err) {
