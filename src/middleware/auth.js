@@ -1,10 +1,28 @@
-export const auth = (req, res, next) => {
-  const token = "xyz";
-  const userToken = req.query.token; // or from header/body
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
+const userAuth = async (req, res, next) => {
+  //read the token from the req cookies
 
-  if (userToken !== token) {
-    return res.status(403).send("Forbidden");
+  try {
+    const { token } = req.cookies;
+    if (!token) {
+      throw new Error("no token found");
+    }
+
+    const decodeObject = await jwt.verify(token, "secret@123");
+    const { _id } = decodeObject;
+    const user = await User.findById(_id);
+    if (!user) {
+      throw new Error("user not found");
+    }
+    req.user = user; //Jo user login hai, uska data request ke andar store karo.
+    next();
+  } catch (err) {
+    res.status(401).send({ error: "Please authenticate" });
   }
-  console.log("Admin authorized");
-  next();
+  //validate the token
+  //find user
 };
+
+//exporting modules or functions
+module.exports = { userAuth };

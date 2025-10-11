@@ -14,4 +14,14 @@ const validesignUp = (req) => {
   }
 };
 
-module.exports = { validesignUp };
+const validateProfileData = (req) => {
+  const allowedUpdates = ["firstName", "lastName", "age", "gender"];
+
+  const isUpdateAllowed = Object.keys(req.body).every((field) =>
+    allowedUpdates.includes(field)
+  );
+  return isUpdateAllowed;
+  console.log(isUpdateAllowed);
+};
+
+module.exports = { validesignUp, validateProfileData };
