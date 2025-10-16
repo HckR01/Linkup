@@ -47,5 +47,51 @@ requestRouter.post("/request/:status/:touserId", userAuth, async (req, res) => {
     res.status(400).send("Internal Server..." + err.message);
   }
 });
+// accept/reject connection request
+requestRouter.post(
+  "/respond/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { requestId, status } = req.params;
+      const allowStatus = ["accepted", "rejected"];
+      if (!allowStatus.includes(status)) {
+        return res.status(400).json("Invalid status only accepted/rejected");
+      }
 
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUserId: loggedInUser._id,
+        status: "interested",
+      });
+      if (!connectionRequest) {
+        return res
+          .status(404)
+          .json("Connection request not found or already responded");
+      }
+
+      connectionRequest.status = status;
+      const data = await connectionRequest.save();
+
+      res.json({
+        message: "You have " + status + " the connection request",
+        data: data,
+      });
+      res.json({
+        message:
+          "You have " +
+          status +
+          " connection request from user ID: " +
+          connectionRequest.fromUserId,
+        data: connectionRequest,
+      });
+      //is urequest id valid and log
+
+      //only to user can accept/reject the request
+    } catch (err) {
+      res.status(400).send("accept or reject error :" + err.message);
+    }
+  }
+);
 module.exports = requestRouter;
