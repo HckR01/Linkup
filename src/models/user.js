@@ -42,18 +42,24 @@ const userSchema = new mongoose.Schema(
     gender: {
       type: String,
       required: true,
-      validate(value) {
-        const allowedGenders = ["male", "female", "other"];
-        if (!allowedGenders.includes(value.toLowerCase())) {
-          throw new Error(
-            "Invalid gender! Allowed values: male, female, other"
-          );
-        }
+      enum: {
+        values: ["male", "female", "other"],
+        message: "{VALUE} is not supported",
       },
+      // validate(value) {
+      //   const allowedGenders = ["male", "female", "other"];
+      //   if (!allowedGenders.includes(value.toLowerCase())) {
+      //     throw new Error(
+      //       "Invalid gender! Allowed values: male, female, other"
+      //     );
+      //   }
+      // },
     },
   },
   { timestamps: true } // Add timestamps option
 );
+userSchema.index({ firstName: 1, lastName: 1 }); // Create an index on firstName for faster queries
+
 userSchema.methods.getJWT = async function () {
   const user = this;
   const token = await jwt.sign({ _id: user._id }, "secret@123", {
