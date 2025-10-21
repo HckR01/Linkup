@@ -1,97 +1,92 @@
+const express = require("express");
 const { userAuth } = require("../middleware/auth.js");
 const ConnectionRequest = require("../models/connectionReq.js");
 const User = require("../models/user.js");
 
-const express = require("express");
 const requestRouter = express.Router();
-//send connection test api post
+
+// send connection request
 requestRouter.post("/request/:status/:touserId", userAuth, async (req, res) => {
   try {
-    const fromUserId = req.user._id; //from user id is the logged in user id
+    const fromUserId = req.user._id;
     const toUserId = req.params.touserId;
     const status = req.params.status;
 
     const allowStatus = ["ignored", "interested"];
     if (!allowStatus.includes(status)) {
-      return res.status(400).json("Invalid status");
-    }
-    //check touserid is valid
-    const toUser = await User.findById(toUserId);
-    if (!toUser) {
-      return res.status(404).json("To user not found");
+      return res.status(400).json({ error: "Invalid status" });
     }
 
-    //if there is an existing connection
+    const toUser = await User.findById(toUserId);
+    if (!toUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
     const existingRequest = await ConnectionRequest.findOne({
       $or: [
         { fromUserId, toUserId },
         { fromUserId: toUserId, toUserId: fromUserId },
       ],
     });
+
     if (existingRequest) {
-      return res.status(400).json("Connection request already exists");
+      return res
+        .status(400)
+        .json({ error: "Connection request already exists" });
     }
 
-    const connectionRequest = new ConnectionRequest({
-      fromUserId,
-      toUserId,
-      status,
-    });
+    const newRequest = new ConnectionRequest({ fromUserId, toUserId, status });
+    const savedRequest = await newRequest.save();
 
-    const data = await connectionRequest.save();
     res.json({
-      message: req.user.firstName + " is " + status + " in " + toUser.firstName,
-      data: data,
+      message: `${req.user.firstName} is ${status} in ${toUser.firstName}`,
+      data: savedRequest,
     });
   } catch (err) {
-    res.status(400).send("Internal Server..." + err.message);
+    res.status(500).send("Internal Server Error: " + err.message);
   }
 });
-// accept/reject connection request
+
+// respond to connection request
 requestRouter.post(
   "/respond/:status/:requestId",
   userAuth,
   async (req, res) => {
     try {
       const loggedInUser = req.user;
+
+      //status id validation
       const { requestId, status } = req.params;
+
       const allowStatus = ["accepted", "rejected"];
       if (!allowStatus.includes(status)) {
-        return res.status(400).json("Invalid status only accepted/rejected");
+        return res
+          .status(400)
+          .json("Invalid status — only accepted/rejected allowed");
       }
+      //connection id validation
 
-      const connectionRequest = await ConnectionRequest.findOne({
+      const connectionReq = await ConnectionRequest.findOne({
         _id: requestId,
         toUserId: loggedInUser._id,
         status: "interested",
       });
-      if (!connectionRequest) {
-        return res
-          .status(404)
-          .json("Connection request not found or already responded");
+
+      if (!connectionReq) {
+        return res.status(404).json("Connection request not found");
       }
 
-      connectionRequest.status = status;
-      const data = await connectionRequest.save();
+      connectionReq.status = status;
+      const updated = await connectionReq.save();
 
       res.json({
-        message: "You have " + status + " the connection request",
-        data: data,
+        message: `You have ${status} the connection request from user ID: ${connectionReq.fromUserId}`,
+        data: updated,
       });
-      res.json({
-        message:
-          "You have " +
-          status +
-          " connection request from user ID: " +
-          connectionRequest.fromUserId,
-        data: connectionRequest,
-      });
-      //is urequest id valid and log
-
-      //only to user can accept/reject the request
     } catch (err) {
-      res.status(400).send("accept or reject error :" + err.message);
+      res.status(500).send("Error while accepting/rejecting: " + err.message);
     }
   }
 );
+
 module.exports = requestRouter;
