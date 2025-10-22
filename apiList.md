@@ -19,3 +19,6 @@ userRouter
 GET /user/CONNECTION
 GET /user/REQUEST
 GET /user/FEED-GETS YOU THE PROFILR OF ANOTHER USER ON PLATFROM
+
+-Logic for the /feed api
+-use $nin , $and ,$or,$ne and other query operator

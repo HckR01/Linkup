@@ -46,6 +46,7 @@ const userSchema = new mongoose.Schema(
         values: ["male", "female", "other"],
         message: "{VALUE} is not supported",
       },
+
       // validate(value) {
       //   const allowedGenders = ["male", "female", "other"];
       //   if (!allowedGenders.includes(value.toLowerCase())) {
@@ -54,6 +55,11 @@ const userSchema = new mongoose.Schema(
       //     );
       //   }
       // },
+    },
+    imageUrl: {
+      type: String,
+      default:
+        "https://www.pngall.com/wp-content/uploads/5/Profile-PNG-High-Quality-Image.png",
     },
   },
   { timestamps: true } // Add timestamps option
