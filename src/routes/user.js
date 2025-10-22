@@ -46,9 +46,17 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 userRouter.get("/feed", userAuth, async (req, res) => {
   try {
     const loggedinUser = req.user; //todo->1.user can see all card but not its won and
+    //pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    //sanitize limit
+    if (limit > 100) {
+      return res.status(400).json({ error: "Limit should not exceed 100" });
+    }
+    const skip = (page - 1) * limit;
     //2.ignored people
     //3.alredy sent the connection request
-    //
+    //.................................................................................
     //find all the connection request sent + receive
     const connectionRequests = await ConnectionRequest.find({
       $or: [{ fromUserId: loggedinUser._id }, { toUserId: loggedinUser._id }],
@@ -67,7 +75,10 @@ userRouter.get("/feed", userAuth, async (req, res) => {
         { _id: { $nin: Array.from(hideUsersFromFeed) } },
         { _id: { $ne: loggedinUser._id } },
       ],
-    }).select(userSafeData);
+    })
+      .select(userSafeData)
+      .skip(skip)
+      .limit(limit);
 
     //
 
