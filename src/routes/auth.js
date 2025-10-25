@@ -49,13 +49,13 @@ authRouter.post("/login", async (req, res) => {
     if (result) {
       //create a jwt token
       const token = await user.getJWT(); //in the user
-      console.log(token);
+
       res.cookie("token", token, {
         expires: new Date(Date.now() + 8 * 3600000),
         httpOnly: true,
       });
       //add the  token to the cookie and send back the user
-      res.send("login success");
+      res.send(user);
     } else {
       throw new Error("password incorrect"); //throw error
     }

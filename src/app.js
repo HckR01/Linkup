@@ -2,10 +2,18 @@ const express = require("express");
 const connectDB = require("./config/database");
 const cookieParser = require("cookie-parser");
 const User = require("./models/user");
+const cros = require("cors");
 const app = express();
 const port = 3000;
 //middleware
 // ✅ fixed import
+
+app.use(
+  cros({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json()); //middleware to parse json data
 app.use(cookieParser()); //middleware to parse cookie data
 //routers imports
@@ -96,14 +104,10 @@ connectDB();
 //.....................................................................
 
 //call the function and error handel
-connectDB()
-  .then(() => {
-    console.log("DB CONNECTED");
-    app.listen(port, () => {
-      console.log(`Example app listening on port ${port}`);
-      //note->here in production level we do connect our db first then call the server
-    });
-  })
-  .catch((err) => {
-    console.error("connection failed ", err);
+connectDB().then(() => {
+  console.log("DB CONNECTED");
+  app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`);
+    //note->here in production level we do connect our db first then call the server
   });
+});
