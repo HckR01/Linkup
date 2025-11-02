@@ -2,7 +2,7 @@ const express = require("express");
 const connectDB = require("./config/database");
 const cookieParser = require("cookie-parser");
 const User = require("./models/user");
-const cros = require("cors");
+const cros = require("cors"); //1
 const app = express();
 const port = 3000;
 //middleware
@@ -13,7 +13,7 @@ app.use(
     origin: "http://localhost:5173",
     credentials: true,
   })
-);
+); //2
 app.use(express.json()); //middleware to parse json data
 app.use(cookieParser()); //middleware to parse cookie data
 //routers imports
