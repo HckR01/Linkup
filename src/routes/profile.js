@@ -15,6 +15,15 @@ profileRouter.get("/profile", userAuth, async (req, res) => {
     res.status(400).send("Error in profile" + " " + err.message);
   }
 });
+//profile view
+profileRouter.get("/profile/view", userAuth, async (req, res) => {
+  try {
+    const user = req.user; //coming from the middleware
+    res.send(user);
+  } catch (err) {
+    res.status(400).send("Error in profile" + " " + err.message);
+  }
+});
 //profile edit
 profileRouter.patch("/editprofile/edit", userAuth, async (req, res) => {
   try {
